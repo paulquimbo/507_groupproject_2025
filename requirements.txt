@@ -1,0 +1,8 @@
+pandas
+sqlachemy
+pymysql
+matplotlib
+seaborn
+numpy
+scipy
+requests
