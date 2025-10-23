@@ -1,5 +1,5 @@
 pandas
-sqlachemy
+sqlalchemy
 pymysql
 matplotlib
 seaborn
