@@ -1,13 +1,12 @@
 from sqlalchemy import create_engine
 import pandas as pd
-
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 #mapping for database connection
-sql_username = os.getenv('USERNAME')
+sql_username = os.getenv('POWERUSER')
 sql_password = os.getenv('PASSWORD')
 sql_host = os.getenv('HOSTNAME')
 sql_database = os.getenv('DATABASE')
