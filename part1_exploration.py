@@ -4,8 +4,6 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 
-import platform
-
 load_dotenv()
 
 #mapping for database connection
@@ -13,6 +11,8 @@ sql_username = os.getenv('USERNAME')
 sql_password = os.getenv('PASSWORD')
 sql_host = os.getenv('HOSTNAME')
 sql_database = os.getenv('DATABASE')
+
+sql_username
 
 url_string = f"mysql+pymysql://{sql_username}:{sql_password}@{sql_host}:3306/{sql_database}"
 
