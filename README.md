@@ -75,6 +75,6 @@ print(response)
 - I made sure to exclude the `.env` file from version control by adding it to `.gitignore`
 - The `USERNAME` variable was renamed to avoid conflicts with Windows reserved keywords
 - The query was limited to 1000 rows for initial exploration
-
+- The group project repository is hosted at: https://github.com/SBU-Sports-Metrics/507_groupproject_2025.git
 ---
 

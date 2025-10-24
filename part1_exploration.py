@@ -13,8 +13,6 @@ sql_password = os.getenv('PASSWORD')
 sql_host = os.getenv('HOSTNAME')
 sql_database = os.getenv('DATABASE')
 
-sql_username
-
 url_string = f"mysql+pymysql://{sql_username}:{sql_password}@{sql_host}:3306/{sql_database}"
 
 conn = create_engine(url_string)
