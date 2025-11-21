@@ -27,25 +27,15 @@ if player_choice == "All":
 else:
     filtered_df = team_df[team_df['playername'] == player_choice]
 
-# Sidebar date range filter
-min_date = sbusports['timestamp'].min().date()
-max_date = sbusports['timestamp'].max().date()
-date_range = st.sidebar.date_input(
-    "Select Date Range",
-    value=(min_date, max_date),
-    min_value=min_date,
-    max_value=max_date
-)
+# Sidebar year filter (buttons)
+years = sorted(sbusports['timestamp'].dt.year.unique())
+year_choice = st.sidebar.radio("Select Year", ["All"] + years, index=0)
 
-# Apply date filter
-if isinstance(date_range, tuple) and len(date_range) == 2:
-    start_date, end_date = date_range
-    filtered_df = filtered_df[
-        (filtered_df['timestamp'].dt.date >= start_date) &
-        (filtered_df['timestamp'].dt.date <= end_date)
-    ]
+# Apply year filter
+if year_choice != "All":
+    filtered_df = filtered_df[filtered_df['timestamp'].dt.year == year_choice]
 
-st.subheader(f"Metrics for {group_choice} - {player_choice} ({start_date} to {end_date})")
+st.subheader(f"Metrics for {group_choice} - {player_choice}")
 
 # Define the six metrics you want to plot
 metrics_to_plot = [
