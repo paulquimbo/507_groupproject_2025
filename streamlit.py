@@ -5,6 +5,7 @@ import altair as alt
 # Import dataframe
 sbusports = pd.read_csv('raw/sixmetricsclass.csv')
 sbusports['timestamp'] = pd.to_datetime(sbusports['timestamp'])
+sbusports = sbusports.sort_values(by="playername")
 
 # Sidebar selection for groupteam
 group_options = ["All"] + sorted(sbusports['groupteam'].unique().tolist())
