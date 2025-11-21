@@ -4,28 +4,43 @@ import pandas as pd
 # Import dataframe
 sbusports = pd.read_csv('raw/sixmetricsclass.csv')
 
-# Sidebar selection for groupteam
-group_choice = st.sidebar.selectbox(
-    "Select a Group Team",
-    sbusports['groupteam'].unique()
-)
+# Sidebar selection for groupteam (restricted options)
+group_options = ["All"] + sbusports['groupteam'].unique().tolist()
+group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=0)
 
 # Filter dataframe based on groupteam
-team_df = sbusports[sbusports['groupteam'] == group_choice]
+if group_choice == "All":
+    team_df = sbusports.copy()
+else:
+    team_df = sbusports[sbusports['groupteam'] == group_choice]
 
-# Sidebar selection for playername (filtered by groupteam)
-player_choice = st.sidebar.selectbox(
-    "Select a Player",
-    team_df['playername'].unique()
-)
+# Sidebar selection for playername (default "All")
+player_options = ["All"] + team_df['playername'].unique().tolist()
+player_choice = st.sidebar.selectbox("Select a Player", player_options, index=0)
 
 # Filter dataframe based on playername
-filtered_df = team_df[team_df['playername'] == player_choice]
+if player_choice == "All":
+    filtered_df = team_df.copy()
+else:
+    filtered_df = team_df[team_df['playername'] == player_choice]
 
 st.subheader(f"Metrics for {group_choice} - {player_choice}")
 
-# First graph: timestamp vs metric/value
-st.line_chart(filtered_df, x='timestamp', y=['metric', 'value'])
+# Define the six metrics you want to plot
+metrics_to_plot = [
+    "Speed_Max",
+    "Jump Height(M)",
+    "Mrsi",
+    "Peak Velocity(M/S)",
+    "Peak Propulsive Power(W)",
+    "Distance_Total"
+]
 
-# Second graph: metric vs classification
-st.bar_chart(filtered_df, x='metric', y='classification')
+# Loop through each metric and create a line chart
+for metric in metrics_to_plot:
+    metric_df = filtered_df[filtered_df['metric'] == metric]
+    if not metric_df.empty:
+        st.write(f"### {metric}")
+        st.line_chart(metric_df, x='timestamp', y='value')
+    else:
+        st.write(f"### {metric} (no data available)")
