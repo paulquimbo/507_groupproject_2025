@@ -12,18 +12,24 @@ group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=
 
 team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam'] == group_choice]
 
-# Restrict to 4 specific players
-selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755', 'PLAYER_995']
+# --- NEW: Checkbox to toggle restricted player list ---
+restrict_players = st.sidebar.checkbox("Restrict to selected players", value=False)
+
+# Define your 4 selected players (replace with actual names or logic)
+selected_players = ["PlayerA", "PlayerB", "PlayerC", "PlayerD"]
+
+if restrict_players:
+    # Only show "All" + the 4 selected players
+    player_options = ["All"] + [p for p in selected_players if p in team_df['playername'].unique()]
+else:
+    # Show "All" + all players
+    player_options = ["All"] + team_df['playername'].unique().tolist()
 
 # Sidebar selection for playername (multi-select)
-player_options = ["All"] + selected_players
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
 
-# Apply filtering logic
-if "All" in player_choice:
-    filtered_df = team_df[team_df['playername'].isin(selected_players)]
-else:
-    filtered_df = team_df[team_df['playername'].isin(player_choice)]
+# Filter dataframe
+filtered_df = team_df if "All" in player_choice else team_df[team_df['playername'].isin(player_choice)]
 
 # Sidebar year filter (buttons)
 years = sorted(sbusports['timestamp'].dt.year.unique())
@@ -41,6 +47,7 @@ metrics_to_plot = [
     "Peak Propulsive Power(W)",
     "Distance_Total"
 ]
+
 for metric in metrics_to_plot:
     metric_df = filtered_df[filtered_df['metric'] == metric]
     st.write(f"### {metric}")
@@ -68,7 +75,7 @@ for metric in metrics_to_plot:
     trend = (
         alt.Chart(metric_df)
         .transform_regression('timestamp', 'value')
-        .mark_line(color='yellow', size=2)
+        .mark_line(color='red', size=3)
         .encode(
             x='timestamp:T',
             y='value:Q'
