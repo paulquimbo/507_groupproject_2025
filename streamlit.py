@@ -68,7 +68,7 @@ for metric in metrics_to_plot:
     trend = (
         alt.Chart(metric_df)
         .transform_regression('timestamp', 'value')
-        .mark_line(color='red', size=3)
+        .mark_line(color='white', size=5)
         .encode(
             x='timestamp:T',
             y='value:Q'
