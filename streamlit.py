@@ -7,7 +7,7 @@ sbusports = pd.read_csv('raw/sixmetricsclass.csv')
 sbusports['timestamp'] = pd.to_datetime(sbusports['timestamp'])
 
 # Sidebar selection for groupteam
-group_options = ["All"] + sbusports['groupteam'].unique().tolist()
+group_options = ["All"] + sorted(sbusports['groupteam'].unique().tolist())
 group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=0)
 
 team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam'] == group_choice]
@@ -16,13 +16,13 @@ team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam
 restrict_players = st.sidebar.checkbox("Check to choose the 4 selected players", value=False)
 
 # Define your 4 selected players
-selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755','PLAYER_995']
+selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755', 'PLAYER_995']
 
 # Build player options
 if restrict_players:
-    player_options = ["All"] + selected_players
+    player_options = ["All"] + sorted(selected_players)
 else:
-    player_options = ["All"] + team_df['playername'].unique().tolist()
+    player_options = ["All"] + sorted(team_df['playername'].unique().tolist())
 
 # Sidebar selection for playername (multi-select)
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
