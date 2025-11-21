@@ -16,7 +16,7 @@ team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam
 restrict_players = st.sidebar.checkbox("Restrict to selected players", value=False)
 
 # Define your 4 selected players (replace with actual names or logic)
-selected_players = ["PlayerA", "PlayerB", "PlayerC", "PlayerD"]
+selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755','PLAYER_995']
 
 if restrict_players:
     # Only show "All" + the 4 selected players
