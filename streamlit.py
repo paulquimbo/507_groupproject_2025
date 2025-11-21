@@ -12,11 +12,20 @@ group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=
 
 team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam'] == group_choice]
 
+# Sidebar option: restrict to 4 specific players
+selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755', 'PLAYER_995']
+only_special = st.sidebar.checkbox("Show only 4 special players")
+
 # Sidebar selection for playername (multi-select)
 player_options = ["All"] + team_df['playername'].unique().tolist()
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
 
-filtered_df = team_df if "All" in player_choice else team_df[team_df['playername'].isin(player_choice)]
+# Apply filtering logic
+if only_special:
+    filtered_df = team_df[team_df['playername'].isin(selected_players)]
+    player_choice = selected_players  # override display label
+else:
+    filtered_df = team_df if "All" in player_choice else team_df[team_df['playername'].isin(player_choice)]
 
 # Sidebar year filter (buttons)
 years = sorted(sbusports['timestamp'].dt.year.unique())
