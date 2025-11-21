@@ -34,7 +34,6 @@ metrics_to_plot = [
     "Peak Propulsive Power(W)",
     "Distance_Total"
 ]
-
 for metric in metrics_to_plot:
     metric_df = filtered_df[filtered_df['metric'] == metric]
     st.write(f"### {metric}")
@@ -42,15 +41,14 @@ for metric in metrics_to_plot:
         st.write("No data available")
         continue
 
-    # Base line chart with "Series" = playername
+    # Base line chart with player colors
     line = (
         alt.Chart(metric_df)
         .mark_line(point=True)
-        .transform_calculate(Series='datum.playername')  # Series field from playername
         .encode(
             x=alt.X('timestamp:T', title='Timestamp'),
             y=alt.Y('value:Q', title='Value'),
-            color=alt.Color('Series:N', title='Series'),
+            color=alt.Color('playername:N', title='Player'),
             tooltip=[
                 alt.Tooltip('timestamp:T', title='Timestamp'),
                 alt.Tooltip('playername:N', title='Player'),
@@ -59,18 +57,17 @@ for metric in metrics_to_plot:
         )
     )
 
-    # Trend line with "Series" = 'TREND'
+    # Trend line with fixed color and label "TREND"
     trend = (
         alt.Chart(metric_df)
         .transform_regression('timestamp', 'value')
-        .mark_line(size=3)
-        .transform_calculate(Series="'TREND'")
+        .mark_line(color='red', size=3)   # force TREND to be red
         .encode(
             x='timestamp:T',
-            y='value:Q',
-            color=alt.Color('Series:N', title='Series')
+            y='value:Q'
         )
+        .properties(title="TREND")
     )
 
-    chart = (line + trend).resolve_scale(color='independent')
+    chart = line + trend
     st.altair_chart(chart, use_container_width=True)
