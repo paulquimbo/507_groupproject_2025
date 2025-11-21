@@ -18,19 +18,23 @@ restrict_players = st.sidebar.checkbox("Check to choose the 4 selected players",
 # Define your 4 selected players
 selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755','PLAYER_995']
 
+# Build player options
 if restrict_players:
-    # Always show "All" + the 4 selected players (no filtering against team_df)
     player_options = ["All"] + selected_players
 else:
-    # Show "All" + all players in the current team_df
     player_options = ["All"] + team_df['playername'].unique().tolist()
 
 # Sidebar selection for playername (multi-select)
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
 
-# Filter dataframe
+# --- FIXED FILTER LOGIC ---
 if "All" in player_choice:
-    filtered_df = team_df
+    if restrict_players:
+        # "All" = only the 4 selected players
+        filtered_df = team_df[team_df['playername'].isin(selected_players)]
+    else:
+        # "All" = all players in team_df
+        filtered_df = team_df
 else:
     filtered_df = team_df[team_df['playername'].isin(player_choice)]
 
