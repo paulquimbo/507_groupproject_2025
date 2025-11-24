@@ -50,7 +50,6 @@ st.subheader(f"Metrics for {group_choice} - {', '.join(player_choice)}")
 metrics_to_plot = [
     "Speed_Max",
     "Jump Height(M)",
-    "Mrsi",
     "Peak Velocity(M/S)",
     "Peak Propulsive Power(W)",
     "Distance_Total"
