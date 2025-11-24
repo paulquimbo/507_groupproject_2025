@@ -10,14 +10,15 @@ def load_data():
     df = df.sort_values(by="playername")
     return df
 
-sbusports = load_data()
+
 
 
 
 # Import dataframe
-sbusports = pd.read_csv('raw/sixmetricsclass.csv')
+sbusports = load_data()
 sbusports['timestamp'] = pd.to_datetime(sbusports['timestamp'])
 sbusports = sbusports.sort_values(by="playername")
+
 
 # Sidebar selection for groupteam
 group_options = ["All"] + sorted(sbusports['groupteam'].unique().tolist())
