@@ -3,7 +3,7 @@ import pandas as pd
 import altair as alt
 
 # Import dataframe
-sbusports = pd.read_csv('raw/sixmetricsclass.csv')
+sbusports = pd.read_csv('raw/sixmetrics_data.csv')
 sbusports['timestamp'] = pd.to_datetime(sbusports['timestamp'])
 sbusports = sbusports.sort_values(by="playername")
 
