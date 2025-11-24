@@ -14,7 +14,7 @@ group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=
 team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam'] == group_choice]
 
 # --- NEW: Checkbox to toggle restricted player list ---
-restrict_players = st.sidebar.checkbox("Check to choose the 4 selected players", value=False)
+restrict_players = st.sidebar.checkbox("Check Box for Selected Players", value=False)
 
 # Define your 4 selected players
 selected_players = ['PLAYER_741', 'PLAYER_555', 'PLAYER_755', 'PLAYER_995']
