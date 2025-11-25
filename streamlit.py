@@ -39,7 +39,7 @@ else:
 # Sidebar selection for playername (multi-select)
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
 
-# FIXED FILTER LOGIC (still uses playername) 
+# FIXED FILTER LOGIC (still uses playername)
 if "All" in player_choice:
     if restrict_players:
         # "All" = only the 4 selected players
@@ -50,11 +50,31 @@ if "All" in player_choice:
 else:
     filtered_df = team_df[team_df['playername'].isin(player_choice)]
 
-# Sidebar year filter (buttons)
+# Sidebar year filter (radio buttons)
 years = sorted(sbusports['timestamp'].dt.year.unique())
 year_choice = st.sidebar.radio("Select Year", ["All"] + years, index=0)
+
 if year_choice != "All":
     filtered_df = filtered_df[filtered_df['timestamp'].dt.year == year_choice]
+
+# --- NEW: Date range filter ---
+min_date = sbusports['timestamp'].min().date()
+max_date = sbusports['timestamp'].max().date()
+
+date_range = st.sidebar.date_input(
+    "Select Date Range (From - To)",
+    value=(min_date, max_date),
+    min_value=min_date,
+    max_value=max_date
+)
+
+# Apply date filter if two dates are selected
+if isinstance(date_range, tuple) and len(date_range) == 2:
+    start_date, end_date = date_range
+    filtered_df = filtered_df[
+        (filtered_df['timestamp'].dt.date >= start_date) &
+        (filtered_df['timestamp'].dt.date <= end_date)
+    ]
 
 # Subheader (still shows chosen players by name)
 st.subheader(f"Metrics for {group_choice} - {', '.join(player_choice)}")
