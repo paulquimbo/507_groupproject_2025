@@ -1,39 +1,17 @@
-# --- Add combined label column ---
+# --- Add combined label column for display only ---
 sbusports['player_label'] = sbusports['playername'] + " (" + sbusports['groupteam'] + ")"
 
-# Make sure filtered_df also carries this column
-if "All" in player_choice:
-    if restrict_players:
-        filtered_df = team_df[team_df['playername'].isin(selected_players)]
-    else:
-        filtered_df = team_df
-else:
-    filtered_df = team_df[team_df['playername'].isin(player_choice)]
-
-# Sidebar year filter
-years = sorted(sbusports['timestamp'].dt.year.unique())
-year_choice = st.sidebar.radio("Select Year", ["All"] + years, index=0)
-if year_choice != "All":
-    filtered_df = filtered_df[filtered_df['timestamp'].dt.year == year_choice]
-
-# Update subheader to show combined labels
-chosen_labels = filtered_df['player_label'].unique().tolist()
-st.subheader(f"Metrics for {group_choice} - {', '.join(chosen_labels)}")
-
-metrics_to_plot = [
-    "Speed_Max",
-    "Jump Height(M)",
-    "Peak Velocity(M/S)",
-    "Peak Propulsive Power(W)",
-    "Distance_Total"
-]
+# ... your filtering logic stays exactly the same ...
 
 for metric in metrics_to_plot:
-    metric_df = filtered_df[filtered_df['metric'] == metric]
+    metric_df = filtered_df[filtered_df['metric'] == metric].copy()
     st.write(f"### {metric}")
     if metric_df.empty:
         st.write("No data available")
         continue
+
+    # IMPORTANT: add the combined label to the filtered dataframe too
+    metric_df['player_label'] = metric_df['playername'] + " (" + metric_df['groupteam'] + ")"
 
     # Base line chart with player+team labels
     line = (
@@ -42,10 +20,10 @@ for metric in metrics_to_plot:
         .encode(
             x=alt.X('timestamp:T', title='Timestamp'),
             y=alt.Y('value:Q', title='Value'),
-            color=alt.Color('player_label:N', title='Player (Team)'),
+            color=alt.Color('player_label:N', title='Player (Team)'),   # <-- use label
             tooltip=[
                 alt.Tooltip('timestamp:T', title='Timestamp'),
-                alt.Tooltip('player_label:N', title='Player (Team)'),
+                alt.Tooltip('player_label:N', title='Player (Team)'),   # <-- use label
                 alt.Tooltip('value:Q', title='Value')
             ]
         )
