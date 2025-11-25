@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-from datetime import date
+from datetime import date, timedelta
 
 # Cache data loading for performance
 @st.cache_data
@@ -43,10 +43,8 @@ player_choice = st.sidebar.multiselect("Select Player(s)", player_options, defau
 # Filter logic
 if "All" in player_choice:
     if restrict_players:
-        # "All" = only the 4 selected players
         filtered_df = team_df[team_df['playername'].isin(selected_players)]
     else:
-        # "All" = all players in team_df
         filtered_df = team_df
 else:
     filtered_df = team_df[team_df['playername'].isin(player_choice)]
@@ -58,24 +56,20 @@ year_choice = st.sidebar.radio("Select Year", ["All"] + years, index=0)
 if year_choice != "All":
     filtered_df = filtered_df[filtered_df['timestamp'].dt.year == year_choice]
 
-# --- Date range filter ---
-min_date = sbusports['timestamp'].min().date()   # earliest date in dataset
-max_date = date.today()                          # current system date
+# --- NEW: Predefined date range choices ---
+range_options = {
+    "Past Month": timedelta(days=30),
+    "Past 3 Months": timedelta(days=90),
+    "Past 6 Months": timedelta(days=180),
+    "Past 1 Year": timedelta(days=365),
+    "Past 2 Years": timedelta(days=730)
+}
 
-date_range = st.sidebar.date_input(
-    "Select Date Range (From - To)",
-    value=(min_date, max_date),
-    min_value=min_date,
-    max_value=max_date
-)
+range_choice = st.sidebar.selectbox("Select Time Range", ["All"] + list(range_options.keys()), index=0)
 
-# Apply date filter if two dates are selected
-if isinstance(date_range, tuple) and len(date_range) == 2:
-    start_date, end_date = date_range
-    filtered_df = filtered_df[
-        (filtered_df['timestamp'].dt.date >= start_date) &
-        (filtered_df['timestamp'].dt.date <= end_date)
-    ]
+if range_choice != "All":
+    cutoff_date = date.today() - range_options[range_choice]
+    filtered_df = filtered_df[filtered_df['timestamp'].dt.date >= cutoff_date]
 
 # Subheader
 st.subheader(f"Metrics for {group_choice} - {', '.join(player_choice)}")
@@ -95,10 +89,8 @@ for metric in metrics_to_plot:
         st.write("No data available")
         continue
 
-    # Add combined label column to filtered data
     metric_df['player_label'] = metric_df['playername'] + " (" + metric_df['groupteam'] + ")"
 
-    # Base line chart with player+team labels
     line = (
         alt.Chart(metric_df)
         .mark_line(point=True)
@@ -114,7 +106,6 @@ for metric in metrics_to_plot:
         )
     )
 
-    # Trend line with fixed color and label "TREND"
     trend = (
         alt.Chart(metric_df)
         .transform_regression('timestamp', 'value')
