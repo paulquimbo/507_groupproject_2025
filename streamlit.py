@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from datetime import date
 
 # Cache data loading for performance
 @st.cache_data
@@ -24,7 +25,7 @@ group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=
 
 team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam'] == group_choice]
 
-# NEW: Checkbox to toggle restricted player list
+# Checkbox to toggle restricted player list
 restrict_players = st.sidebar.checkbox("Check Box for Selected Players", value=False)
 
 # Define your 4 selected players
@@ -39,7 +40,7 @@ else:
 # Sidebar selection for playername (multi-select)
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
 
-# FIXED FILTER LOGIC (still uses playername)
+# Filter logic
 if "All" in player_choice:
     if restrict_players:
         # "All" = only the 4 selected players
@@ -57,9 +58,9 @@ year_choice = st.sidebar.radio("Select Year", ["All"] + years, index=0)
 if year_choice != "All":
     filtered_df = filtered_df[filtered_df['timestamp'].dt.year == year_choice]
 
-# --- NEW: Date range filter ---
-min_date = sbusports['timestamp'].min().date()
-max_date = sbusports['timestamp'].max().date()
+# --- Date range filter ---
+min_date = sbusports['timestamp'].min().date()   # earliest date in dataset
+max_date = date.today()                          # current system date
 
 date_range = st.sidebar.date_input(
     "Select Date Range (From - To)",
@@ -76,7 +77,7 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
         (filtered_df['timestamp'].dt.date <= end_date)
     ]
 
-# Subheader (still shows chosen players by name)
+# Subheader
 st.subheader(f"Metrics for {group_choice} - {', '.join(player_choice)}")
 
 metrics_to_plot = [
