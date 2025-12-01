@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from datetime import date, timedelta
 
 # Cache data loading for performance
 @st.cache_data
@@ -10,15 +11,13 @@ def load_data():
     df = df.sort_values(by="playername")
     return df
 
-
-
-
-
 # Import dataframe
 sbusports = load_data()
 sbusports['timestamp'] = pd.to_datetime(sbusports['timestamp'])
 sbusports = sbusports.sort_values(by="playername")
 
+# Add combined label column for display
+sbusports['player_label'] = sbusports['playername'] + " (" + sbusports['groupteam'] + ")"
 
 # Sidebar selection for groupteam
 group_options = ["All"] + sorted(sbusports['groupteam'].unique().tolist())
@@ -26,7 +25,7 @@ group_choice = st.sidebar.selectbox("Select a Group Team", group_options, index=
 
 team_df = sbusports if group_choice == "All" else sbusports[sbusports['groupteam'] == group_choice]
 
-# --- NEW: Checkbox to toggle restricted player list ---
+# Checkbox to toggle restricted player list
 restrict_players = st.sidebar.checkbox("Check Box for Selected Players", value=False)
 
 # Define your 4 selected players
@@ -41,23 +40,38 @@ else:
 # Sidebar selection for playername (multi-select)
 player_choice = st.sidebar.multiselect("Select Player(s)", player_options, default=["All"])
 
-# --- FIXED FILTER LOGIC ---
+# Filter logic
 if "All" in player_choice:
     if restrict_players:
-        # "All" = only the 4 selected players
         filtered_df = team_df[team_df['playername'].isin(selected_players)]
     else:
-        # "All" = all players in team_df
         filtered_df = team_df
 else:
     filtered_df = team_df[team_df['playername'].isin(player_choice)]
 
-# Sidebar year filter (buttons)
+# Sidebar year filter (radio buttons)
 years = sorted(sbusports['timestamp'].dt.year.unique())
 year_choice = st.sidebar.radio("Select Year", ["All"] + years, index=0)
+
 if year_choice != "All":
     filtered_df = filtered_df[filtered_df['timestamp'].dt.year == year_choice]
 
+# --- NEW: Predefined date range choices ---
+range_options = {
+    "Past Month": timedelta(days=30),
+    "Past 3 Months": timedelta(days=90),
+    "Past 6 Months": timedelta(days=180),
+    "Past 1 Year": timedelta(days=365),
+    "Past 2 Years": timedelta(days=730)
+}
+
+range_choice = st.sidebar.selectbox("Select Time Range", ["All"] + list(range_options.keys()), index=0)
+
+if range_choice != "All":
+    cutoff_date = date.today() - range_options[range_choice]
+    filtered_df = filtered_df[filtered_df['timestamp'].dt.date >= cutoff_date]
+
+# Subheader
 st.subheader(f"Metrics for {group_choice} - {', '.join(player_choice)}")
 
 metrics_to_plot = [
@@ -69,29 +83,29 @@ metrics_to_plot = [
 ]
 
 for metric in metrics_to_plot:
-    metric_df = filtered_df[filtered_df['metric'] == metric]
+    metric_df = filtered_df[filtered_df['metric'] == metric].copy()
     st.write(f"### {metric}")
     if metric_df.empty:
         st.write("No data available")
         continue
 
-    # Base line chart with player colors
+    metric_df['player_label'] = metric_df['playername'] + " (" + metric_df['groupteam'] + ")"
+
     line = (
         alt.Chart(metric_df)
         .mark_line(point=True)
         .encode(
             x=alt.X('timestamp:T', title='Timestamp'),
             y=alt.Y('value:Q', title='Value'),
-            color=alt.Color('playername:N', title='Player'),
+            color=alt.Color('player_label:N', title='Player (Team)'),
             tooltip=[
                 alt.Tooltip('timestamp:T', title='Timestamp'),
-                alt.Tooltip('playername:N', title='Player'),
+                alt.Tooltip('player_label:N', title='Player (Team)'),
                 alt.Tooltip('value:Q', title='Value')
             ]
         )
     )
 
-    # Trend line with fixed color and label "TREND"
     trend = (
         alt.Chart(metric_df)
         .transform_regression('timestamp', 'value')
