@@ -137,6 +137,7 @@ for metric in metrics_to_plot:
 
     st.altair_chart(chart, use_container_width=True)
 
+
 # --- NEW SECTION: Comparison of Player Mean vs GroupTeam Mean ---
 st.subheader("Comparison: Player Mean vs GroupTeam Mean")
 
@@ -183,6 +184,7 @@ for metric in metrics_to_plot:
             x=alt.X('player_label:N', title='Player (Team)'),
             y=alt.Y('MeanValue:Q', title='Mean Value'),
             color=alt.Color('Type:N', title='Mean Type', scale=alt.Scale(scheme='set2')),
+            column=alt.Column('Type:N', title='Mean Type'),  # ensures side-by-side grouping
             tooltip=['player_label:N', 'Type:N', 'MeanValue:Q']
         )
     )
