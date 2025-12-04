@@ -3,6 +3,12 @@ import pandas as pd
 import altair as alt
 from datetime import date, timedelta
 
+# --- Page config to remove huge left space ---
+st.set_page_config(
+    page_title="Sports Metrics Dashboard",
+    layout="wide"   # <-- makes charts span full width, no big gutter
+)
+
 # Cache data loading for performance
 @st.cache_data
 def load_data():
