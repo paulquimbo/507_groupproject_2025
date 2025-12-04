@@ -180,8 +180,8 @@ for metric in metrics_to_plot:
         alt.Chart(comparison_melt)
         .mark_bar()
         .encode(
-            x=alt.X('player_label:N', title='Player (Team)'),
-            xOffset='Type:N',  # <-- ensures side-by-side bars per player
+            x=alt.X('player_label:N', title='Player (Team)', axis=alt.Axis(labelAngle=0)),  # keep labels horizontal
+            xOffset='Type:N',  # side-by-side bars per player
             y=alt.Y('MeanValue:Q', title='Mean Value'),
             color=alt.Color('Type:N', title='Mean Type', scale=alt.Scale(scheme='set2')),
             tooltip=['player_label:N', 'Type:N', 'MeanValue:Q']
