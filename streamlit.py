@@ -132,4 +132,60 @@ for metric in metrics_to_plot:
         )
 
         chart = (line + trend).facet(
-            column
+            column='player_label:N'
+        )
+
+    st.altair_chart(chart, use_container_width=True)
+
+# --- NEW SECTION: Comparison of Player Mean vs GroupTeam Mean ---
+st.subheader("Comparison: Player Mean vs GroupTeam Mean")
+
+for metric in metrics_to_plot:
+    metric_df = filtered_df[filtered_df['metric'] == metric].copy()
+    if metric_df.empty:
+        st.write(f"No data available for {metric}")
+        continue
+
+    # Player mean (based on current filters)
+    player_means = (
+        metric_df.groupby(['playername', 'groupteam'], as_index=False)
+        .agg({'value': 'mean'})
+        .rename(columns={'value': 'player_mean'})
+    )
+
+    # GroupTeam mean (based on current filters)
+    group_means = (
+        metric_df.groupby('groupteam', as_index=False)
+        .agg({'value': 'mean'})
+        .rename(columns={'value': 'group_mean'})
+    )
+
+    # Merge player mean with group mean
+    comparison_df = pd.merge(player_means, group_means, on='groupteam')
+
+    # Melt for Altair grouped bar chart
+    comparison_melt = comparison_df.melt(
+        id_vars=['playername', 'groupteam'],
+        value_vars=['player_mean', 'group_mean'],
+        var_name='Type',
+        value_name='MeanValue'
+    )
+
+    # Label players with team
+    comparison_melt['player_label'] = comparison_melt['playername'] + " (" + comparison_melt['groupteam'] + ")"
+
+    st.write(f"### {metric} Mean Comparison")
+
+    chart = (
+        alt.Chart(comparison_melt, width=1000)  # wider chart for long labels
+        .mark_bar()
+        .encode(
+            x=alt.X('player_label:N', title='Player (Team)', axis=alt.Axis(labelAngle=0)),  # horizontal labels
+            xOffset='Type:N',  # side-by-side bars per player
+            y=alt.Y('MeanValue:Q', title='Mean Value'),
+            color=alt.Color('Type:N', title='Mean Type', scale=alt.Scale(scheme='set2')),
+            tooltip=['player_label:N', 'Type:N', 'MeanValue:Q']
+        )
+    )
+
+    st.altair_chart(chart, use_container_width=True)
