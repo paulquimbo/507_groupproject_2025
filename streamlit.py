@@ -82,6 +82,61 @@ metrics_to_plot = [
     "Distance_Total"
 ]
 
+# --- NEW: Toggle for aggregated vs individual views ---
+agg_view = st.sidebar.checkbox("Show Aggregated View (Mean by GroupTeam)", value=False)
+
+for metric in metrics_to_plot:
+    metric_df = filtered_df[filtered_df['metric'] == metric].copy()
+    st.write(f"### {metric}")
+    if metric_df.empty:
+        st.write("No data available")
+        continue
+
+    metric_df['player_label'] = metric_df['playername'] + " (" + metric_df['groupteam'] + ")"
+
+    if agg_view:
+        # Aggregated mean profiles by groupteam
+        agg_df = (
+            metric_df.groupby(['groupteam', 'timestamp'], as_index=False)
+            .agg({'value': 'mean'})
+        )
+        chart = (
+            alt.Chart(agg_df)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X('timestamp:T', title='Timestamp'),
+                y=alt.Y('value:Q', title='Mean Value'),
+                color=alt.Color('groupteam:N', title='Group Team'),
+                tooltip=['timestamp:T', 'groupteam:N', 'value:Q']
+            )
+        )
+    else:
+        # Faceted charts per player to reduce clutter
+        line = (
+            alt.Chart(metric_df)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X('timestamp:T', title='Timestamp'),
+                y=alt.Y('value:Q', title='Value'),
+                color=alt.Color('player_label:N', title='Player (Team)'),
+                tooltip=['timestamp:T', 'player_label:N', 'value:Q']
+            )
+        )
+
+        trend = (
+            alt.Chart(metric_df)
+            .transform_regression('timestamp', 'value')
+            .mark_line(color='yellow', size=2)
+            .encode(x='timestamp:T', y='value:Q')
+            .properties(title="TREND")
+        )
+
+        chart = (line + trend).facet(
+            column='player_label:N'
+        )
+
+    st.altair_chart(chart, use_container_width=True)
+
 # --- NEW SECTION: Comparison of Player Mean vs GroupTeam Mean ---
 st.subheader("Comparison: Player Mean vs GroupTeam Mean")
 
