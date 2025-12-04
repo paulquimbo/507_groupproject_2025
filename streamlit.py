@@ -82,6 +82,9 @@ metrics_to_plot = [
     "Distance_Total"
 ]
 
+# --- NEW: Toggle for aggregated vs individual views ---
+agg_view = st.sidebar.checkbox("Show Aggregated View (Mean by GroupTeam)", value=False)
+
 for metric in metrics_to_plot:
     metric_df = filtered_df[filtered_df['metric'] == metric].copy()
     st.write(f"### {metric}")
@@ -91,31 +94,45 @@ for metric in metrics_to_plot:
 
     metric_df['player_label'] = metric_df['playername'] + " (" + metric_df['groupteam'] + ")"
 
-    line = (
-        alt.Chart(metric_df)
-        .mark_line(point=True)
-        .encode(
-            x=alt.X('timestamp:T', title='Timestamp'),
-            y=alt.Y('value:Q', title='Value'),
-            color=alt.Color('player_label:N', title='Player (Team)'),
-            tooltip=[
-                alt.Tooltip('timestamp:T', title='Timestamp'),
-                alt.Tooltip('player_label:N', title='Player (Team)'),
-                alt.Tooltip('value:Q', title='Value')
-            ]
+    if agg_view:
+        # Aggregated mean profiles by groupteam
+        agg_df = (
+            metric_df.groupby(['groupteam', 'timestamp'], as_index=False)
+            .agg({'value': 'mean'})
         )
-    )
-
-    trend = (
-        alt.Chart(metric_df)
-        .transform_regression('timestamp', 'value')
-        .mark_line(color='yellow', size=2)
-        .encode(
-            x='timestamp:T',
-            y='value:Q'
+        chart = (
+            alt.Chart(agg_df)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X('timestamp:T', title='Timestamp'),
+                y=alt.Y('value:Q', title='Mean Value'),
+                color=alt.Color('groupteam:N', title='Group Team'),
+                tooltip=['timestamp:T', 'groupteam:N', 'value:Q']
+            )
         )
-        .properties(title="TREND")
-    )
+    else:
+        # Faceted charts per player to reduce clutter
+        line = (
+            alt.Chart(metric_df)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X('timestamp:T', title='Timestamp'),
+                y=alt.Y('value:Q', title='Value'),
+                color=alt.Color('player_label:N', title='Player (Team)'),
+                tooltip=['timestamp:T', 'player_label:N', 'value:Q']
+            )
+        )
 
-    chart = line + trend
+        trend = (
+            alt.Chart(metric_df)
+            .transform_regression('timestamp', 'value')
+            .mark_line(color='yellow', size=2)
+            .encode(x='timestamp:T', y='value:Q')
+            .properties(title="TREND")
+        )
+
+        chart = (line + trend).facet(
+            column='player_label:N'
+        )
+
     st.altair_chart(chart, use_container_width=True)
