@@ -6,7 +6,7 @@ from datetime import date, timedelta
 # Cache data loading for performance
 @st.cache_data
 def load_data():
-    df = pd.read_csv('raw/sixmetrics_data.csv')
+    df = pd.read_csv('raw/fivemetrics_data.csv')
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df = df.sort_values(by="playername")
     return df
