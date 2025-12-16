@@ -1,6 +1,6 @@
 ## Database Connection and Data Exploration
 
-This document outlines the steps I followed to set up my Python environment, connect to the MySQL database, and explore the `research_experiment_refactor_test` table.
+This document outlines the steps  to set up the Python environment, connect to the MySQL database, and explore the `research_experiment_refactor_test` table.
 
 ---
 
@@ -22,12 +22,11 @@ This document outlines the steps I followed to set up my Python environment, con
    ```bash
    pip install sqlalchemy pandas pymysql python-dotenv
    ```
-
 2. **Created a `.env` file** with the following variables:
-        POWERUSER=your_username_here
-        PASSWORD=your_password_here
-        HOSTNAME=your_host_here
-        DATABASE=your_database_name_here
+   POWERUSER=your_username_here
+   PASSWORD=your_password_here
+   HOSTNAME=your_host_here
+   DATABASE=your_database_name_here
 
 ---
 
@@ -62,11 +61,12 @@ sql_toexecute = """
 response = pd.read_sql(sql_toexecute, conn)
 print(response)
 ```
+
 ---
 
 ## Screenshot of Query Results
 
-![Query Output Screenshot](raw/query.png)
+![Query Output Screenshot](jaison_folder/Part%201.1%20Database%20Setup%20(Individual)%20Screenshot/PART_1_SCREENSHOT_DATABASE_CONNECTION.png)
 
 ---
 
@@ -76,5 +76,5 @@ print(response)
 - The `USERNAME` variable was renamed to avoid conflicts with Windows reserved keywords
 - The query was limited to 1000 rows for initial exploration
 - The group project repository is hosted at: https://github.com/SBU-Sports-Metrics/507_groupproject_2025.git
----
 
+---
